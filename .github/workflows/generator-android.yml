@@ -213,6 +213,14 @@ jobs:
             --update-url "${{ env.downloadLink}}/api/version/latest" \
             --ed25519-public-key "${{ env.update_public_key }}"
 
+      - name: Remove accessibility service (view-only, Play Protect)
+        shell: bash
+        run: |
+          M=flutter/android/app/src/main/AndroidManifest.xml
+          perl -0pi -e 's#\s*<service\s+android:name="\.InputService".*?</service>##s' "$M"
+          if grep -q "BIND_ACCESSIBILITY_SERVICE" "$M"; then echo "Accessibility still present!"; exit 1; fi
+          echo "Accessibility service removed."
+
       - name: Patch Android Manifest and Gradle for AGP 8+
         run: |
           MANIFEST_PATH="flutter/android/app/src/main/AndroidManifest.xml"
